@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ADPILOT AI — Tổng quan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0E1626;
+  --navy-2:#141F35;
+  --navy-border:#22304A;
+  --bg:#F4F5F7;
+  --card:#FFFFFF;
+  --border:#E4E6EA;
+  --text:#171A21;
+  --text-dim:#5B6270;
+  --text-faint:#9198A6;
+  --blue:#2B5FE0;
+  --blue-soft:#EEF2FE;
+  --red:#D53F3F;
+  --red-soft:#FCECEC;
+  --orange:#D9822B;
+  --orange-soft:#FBF1E4;
+  --amber:#C9A227;
+  --amber-soft:#FAF6E4;
+  --green:#1F9254;
+  --green-soft:#E9F6EF;
+  --radius:14px;
+  --shadow:0 1px 2px rgba(20,24,32,0.04), 0 1px 8px rgba(20,24,32,0.03);
+  font-family:'Inter',-apple-system,sans-serif;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+:root:not([data-theme="light"]){ }
+*{box-sizing:border-box; margin:0; padding:0;}
+body{background:var(--bg); color:var(--text); font-size:14px; -webkit-font-smoothing:antialiased;}
+.mono{font-family:'IBM Plex Mono',monospace;}
+button{font-family:inherit; cursor:pointer;}
+a{color:inherit; text-decoration:none;}
+:focus-visible{outline:2px solid var(--blue); outline-offset:2px;}
+
+/* ---------- LAYOUT ---------- */
+.app{display:flex; min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{
+  width:264px; flex-shrink:0; background:var(--navy); color:#C8CFDD;
+  display:flex; flex-direction:column; position:sticky; top:0; height:100vh;
+  padding-top:env(safe-area-inset-top,0px);
+}
+.sb-logo{padding:22px 22px 18px; border-bottom:1px solid var(--navy-border);}
+.sb-logo .lg{display:flex; align-items:center; gap:9px; color:#fff; font-weight:600; font-size:15px;}
+.sb-logo svg{width:18px; height:18px;}
+.sb-logo .sub{font-size:11.5px; color:#6E7996; margin-top:4px;}
+
+.sb-nav{flex:1; overflow-y:auto; padding:14px 12px;}
+.sb-section-lbl{font-size:10.5px; text-transform:uppercase; letter-spacing:0.04em; color:#576081; padding:14px 10px 6px;}
+.sb-item{
+  display:flex; align-items:center; gap:11px; padding:9px 10px; border-radius:8px; font-size:13.5px;
+  color:#AEB6C9; margin-bottom:1px; position:relative;
+}
+.sb-item:hover{background:rgba(255,255,255,0.05); color:#fff;}
+.sb-item.active{background:rgba(43,95,224,0.18); color:#fff;}
+.sb-item.active::before{content:''; position:absolute; left:-12px; top:6px; bottom:6px; width:3px; background:var(--blue); border-radius:2px;}
+.sb-item .ic{width:16px; height:16px; flex-shrink:0; opacity:0.85;}
+.sb-item .badge{
+  margin-left:auto; background:var(--red); color:#fff; font-size:10.5px; padding:1px 6px; border-radius:9px; font-family:'IBM Plex Mono',monospace;
+}
+
+.sb-workspace{margin:6px 10px 10px; padding:11px 12px; background:var(--navy-2); border:1px solid var(--navy-border); border-radius:10px;}
+.sb-workspace .name{font-size:13px; color:#fff; font-weight:500;}
+.sb-workspace .meta{font-size:11.5px; color:#7C87A3; margin-top:3px;}
+
+.sb-footer{padding:14px 16px; border-top:1px solid var(--navy-border);}
+.sb-protect{display:flex; align-items:center; gap:7px; font-size:11px; color:#7C87A3; margin-bottom:12px;}
+.sb-protect .dot{width:6px; height:6px; border-radius:50%; background:var(--green);}
+.sb-user{display:flex; align-items:center; gap:9px;}
+.sb-user .av{width:30px; height:30px; border-radius:50%; background:#2A3652; color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; flex-shrink:0;}
+.sb-user .info .nm{font-size:12.5px; color:#fff; font-weight:500;}
+.sb-user .info .rl{font-size:11px; color:#7C87A3;}
+
+/* MAIN */
+.main{flex:1; min-width:0; display:flex; flex-direction:column;}
+
+/* HEADER */
+.topheader{
+  height:60px; background:var(--card); border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:14px; padding:0 22px; position:sticky; top:0; z-index:20;
+  padding-top:env(safe-area-inset-top,0px);
+}
+.search-box{
+  display:flex; align-items:center; gap:8px; background:var(--bg); border:1px solid var(--border);
+  border-radius:8px; padding:7px 12px; width:280px; color:var(--text-faint); font-size:13px;
+}
+.search-box input{border:none; background:none; outline:none; font-size:13px; color:var(--text); width:100%;}
+.conn-status{
+  display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--text-dim);
+  background:var(--green-soft); color:var(--green); padding:5px 10px; border-radius:7px; font-weight:500;
+}
+.conn-status.warn{background:var(--amber-soft); color:#8A6D14;}
+.conn-status .dot{width:6px; height:6px; border-radius:50%; background:currentColor;}
+.header-spacer{flex:1;}
+.hbtn{
+  display:flex; align-items:center; gap:6px; font-size:13px; font-weight:500; padding:7px 13px;
+  border-radius:8px; border:1px solid var(--border); background:var(--card); color:var(--text);
+}
+.hbtn:hover{background:var(--bg);}
+.hbtn.primary{background:var(--blue); border-color:var(--blue); color:#fff;}
+.hbtn.primary:hover{background:#2350C4;}
+.icon-btn{
+  width:34px; height:34px; display:flex; align-items:center; justify-content:center; border-radius:8px;
+  position:relative; color:var(--text-dim);
+}
+.icon-btn:hover{background:var(--bg);}
+.icon-btn .dot{position:absolute; top:6px; right:6px; width:7px; height:7px; border-radius:50%; background:var(--red); border:2px solid var(--card);}
+.hdr-user{width:32px; height:32px; border-radius:50%; background:var(--blue-soft); color:var(--blue); display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600;}
+
+/* CONTENT */
+.content{padding:26px 28px 60px; max-width:1360px; width:100%; margin:0 auto;}
+
+.page-head{display:flex; justify-content:space-between; align-items:flex-start; gap:20px; margin-bottom:22px; flex-wrap:wrap;}
+.page-head h1{font-size:21px; font-weight:600; margin-bottom:4px;}
+.page-head .sub{font-size:13.5px; color:var(--text-dim);}
+.page-controls{display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
+.select-pill{
+  display:flex; align-items:center; gap:6px; font-size:13px; padding:7px 12px; border-radius:8px;
+  border:1px solid var(--border); background:var(--card); color:var(--text);
+}
+
+/* DATA STATUS STRIP */
+.data-strip{
+  display:flex; align-items:center; gap:10px; font-size:12px; color:var(--text-faint); margin-bottom:18px; flex-wrap:wrap;
+}
+.demo-chip{
+  font-size:10.5px; font-weight:600; letter-spacing:0.02em; color:#8A6D14; background:var(--amber-soft);
+  padding:3px 8px; border-radius:5px; font-family:'IBM Plex Mono',monospace;
+}
+
+/* KPI GRID */
+.kpi-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:28px;}
+@media (max-width:1100px){ .kpi-grid{grid-template-columns:repeat(2,1fr);} }
+@media (max-width:560px){ .kpi-grid{grid-template-columns:1fr;} }
+.kpi-card{
+  background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; box-shadow:var(--shadow);
+}
+.kpi-card .top{display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;}
+.kpi-card .lbl{font-size:12.5px; color:var(--text-dim); display:flex; align-items:center; gap:5px;}
+.kpi-card .info-dot{width:13px; height:13px; border-radius:50%; border:1px solid var(--border); font-size:9px; display:flex; align-items:center; justify-content:center; color:var(--text-faint); cursor:help;}
+.kpi-card .val{font-size:22px; font-weight:600; font-family:'IBM Plex Mono',monospace; margin-bottom:6px;}
+.kpi-card .chg{font-size:12.5px; display:flex; align-items:center; gap:4px; font-weight:500;}
+.chg.up{color:var(--green);}
+.chg.down{color:var(--red);}
+.kpi-card .prev{font-size:11.5px; color:var(--text-faint); margin-left:4px; font-weight:400;}
+
+/* AI DIAGNOSIS */
+.section-title{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
+.section-title h2{font-size:16px; font-weight:600;}
+.section-title .link{font-size:12.5px; color:var(--blue); font-weight:500;}
+
+.diag-grid{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:30px;}
+@media (max-width:940px){ .diag-grid{grid-template-columns:1fr;} }
+.diag-card{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden;}
+.diag-head{padding:14px 18px; display:flex; align-items:center; gap:9px; border-bottom:1px solid var(--border);}
+.sev-pill{font-size:11px; font-weight:600; padding:3px 9px; border-radius:6px; display:flex; align-items:center; gap:5px;}
+.sev-pill.critical{background:var(--red-soft); color:var(--red);}
+.sev-pill.high{background:var(--orange-soft); color:var(--orange);}
+.sev-pill.medium{background:var(--amber-soft); color:#8A6D14;}
+.sev-pill.stable{background:var(--green-soft); color:var(--green);}
+.diag-head .camp{font-size:12.5px; color:var(--text-faint); margin-left:auto;}
+.diag-body{padding:16px 18px;}
+.diag-body .headline{font-size:14.5px; font-weight:600; margin-bottom:12px; line-height:1.4;}
+.diag-block{margin-bottom:12px;}
+.diag-block .lbl{font-size:11px; color:var(--text-faint); font-weight:600; text-transform:uppercase; letter-spacing:0.03em; margin-bottom:6px;}
+.diag-block ul{list-style:none;}
+.diag-block li{font-size:13px; color:var(--text-dim); padding:3px 0; padding-left:13px; position:relative;}
+.diag-block li::before{content:'•'; position:absolute; left:0; color:var(--text-faint);}
+.diag-block p{font-size:13px; color:var(--text-dim); line-height:1.5;}
+.diag-actions{display:flex; gap:8px; padding:14px 18px; border-top:1px solid var(--border); background:#FAFBFC;}
+
+/* PRIORITY STRIP */
+.priority-strip{display:flex; gap:12px; margin-bottom:28px; flex-wrap:wrap;}
+.pr-item{
+  flex:1; min-width:140px; background:var(--card); border:1px solid var(--border); border-radius:10px;
+  padding:12px 14px; display:flex; align-items:center; gap:10px; box-shadow:var(--shadow);
+}
+.pr-dot{width:9px; height:9px; border-radius:50%; flex-shrink:0;}
+.pr-dot.critical{background:var(--red);}
+.pr-dot.high{background:var(--orange);}
+.pr-dot.medium{background:var(--amber);}
+.pr-dot.stable{background:var(--green);}
+.pr-count{font-size:18px; font-weight:600; font-family:'IBM Plex Mono',monospace;}
+.pr-lbl{font-size:12px; color:var(--text-dim);}
+
+/* TABLE */
+.table-card{background:var(--card); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden;}
+.table-toolbar{display:flex; align-items:center; gap:10px; padding:14px 16px; border-bottom:1px solid var(--border); flex-wrap:wrap;}
+.table-toolbar input{
+  border:1px solid var(--border); border-radius:7px; padding:7px 11px; font-size:13px; width:220px; outline:none;
+}
+.table-toolbar input:focus{border-color:var(--blue);}
+.tb-spacer{flex:1;}
+.table-scroll{overflow-x:auto;}
+table{width:100%; border-collapse:collapse; font-size:13px; min-width:1080px;}
+thead th{
+  text-align:left; padding:10px 14px; font-size:11.5px; color:var(--text-faint); font-weight:600;
+  text-transform:uppercase; letter-spacing:0.02em; border-bottom:1px solid var(--border); background:#FAFBFC;
+  cursor:pointer; white-space:nowrap; user-select:none;
+}
+thead th:hover{color:var(--text-dim);}
+thead th .arrow{font-size:9px; margin-left:3px; opacity:0.5;}
+tbody td{padding:11px 14px; border-bottom:1px solid var(--border); white-space:nowrap; color:var(--text);}
+tbody tr:hover{background:#FAFBFC;}
+tbody tr:last-child td{border-bottom:none;}
+.camp-name{font-weight:500;}
+.status-pill{font-size:11px; padding:3px 8px; border-radius:6px; font-weight:500;}
+.status-pill.active{background:var(--green-soft); color:var(--green);}
+.status-pill.paused{background:#F0F1F3; color:var(--text-faint);}
+.trend-mini{display:inline-flex; align-items:center; gap:3px; font-size:12px; font-weight:500;}
+.ai-status-pill{font-size:11px; padding:3px 8px; border-radius:6px; font-weight:500; display:inline-flex; align-items:center; gap:5px;}
+
+.table-foot{display:flex; justify-content:space-between; align-items:center; padding:12px 16px; font-size:12.5px; color:var(--text-faint);}
+.pager{display:flex; gap:4px;}
+.pager button{width:28px; height:28px; border-radius:6px; border:1px solid var(--border); background:var(--card); font-size:12.5px; color:var(--text-dim);}
+.pager button.active{background:var(--blue); color:#fff; border-color:var(--blue);}
+
+/* mobile sidebar toggle */
+.mobile-topbar{display:none;}
+@media (max-width:880px){
+  .sidebar{position:fixed; left:0; top:0; z-index:100; transform:translateX(-100%); transition:transform .2s ease;}
+  .sidebar.open{transform:translateX(0);}
+  .app{flex-direction:column;}
+  .mobile-topbar{
+    display:flex; align-items:center; gap:12px; padding:14px 16px; background:var(--navy); color:#fff;
+    padding-top:calc(14px + env(safe-area-inset-top,0px));
+  }
+  .mobile-topbar .hamburger{width:22px; height:16px; position:relative; cursor:pointer;}
+  .mobile-topbar .hamburger span{position:absolute; left:0; right:0; height:2px; background:#fff; border-radius:2px;}
+  .mobile-topbar .hamburger span:nth-child(1){top:0;} .mobile-topbar .hamburger span:nth-child(2){top:7px;} .mobile-topbar .hamburger span:nth-child(3){top:14px;}
+  .search-box{width:auto; flex:1;}
+  .topheader{flex-wrap:wrap; height:auto; padding:10px 16px; gap:8px;}
+  .content{padding:18px;}
+  .kpi-grid{gap:10px;}
+  .overlay{display:none; position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:90;}
+  .overlay.show{display:block;}
+}
+</style>
+</head>
+<body>
+
+<div class="mobile-topbar">
+  <div class="hamburger" id="hamburger"><span></span><span></span><span></span></div>
+  <div style="font-weight:600; font-size:14px;">ADPILOT AI</div>
+</div>
+<div class="overlay" id="overlay"></div>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="lg">
+        <svg viewBox="0 0 20 20" fill="none"><path d="M2 15L7 6L11 12L14 5L18 15" stroke="#2B5FE0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        ADPILOT AI
+      </div>
+      <div class="sub">Advertising Intelligence Platform</div>
+    </div>
+
+    <nav class="sb-nav">
+      <div class="sb-item active"><svg class="ic" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2.5" y="2.5" width="6" height="6" rx="1"/><rect x="11.5" y="2.5" width="6" height="6" rx="1"/><rect x="2.5" y="11.5" width="6" height="6" rx="1"/><rect x="11.5" y="11.5" width="6" height="6" rx="1"/></svg>Tổng quan</div>
+      <div class="sb-item"><svg class="ic" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="7"/></svg>Tài khoản</div>
+      <div class="sb-item"><svg class="ic" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2.5 4.5h15M2.5 10h15M2.5 15.5h9"/></svg>Chiến dịch</div>
+      <div class="sb-item"><svg class="ic" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2.5" y="4" width="15" height="12" rx="1.5"/><path d="M2.5 8h15"/></svg>Nhóm quảng cáo</div>
+      <div class="sb-item"><svg class="ic" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M7 10h6M10 7v6"/></svg>Quảng cáo</div>
+      <div class="sb-item"><svg class="ic" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 6l7-3.5L17 6v8l-7 3.5L3 14V6z"/></svg>Sản phẩm</div>
+      <div class="sb-item"><svg class="ic" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="14" height="10" rx="1.5"/><path d="M7.5 17h5"/></svg>Creative</div>
+
+      <div class="sb-section-lbl">AI</div>
+      <div class="sb-item"><svg class="ic" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 2.5l1.6 3.9 4.2.4-3.2 2.8 1 4.1L10 11.6l-3.6 2.1 1-4.1-3.2-2.8 4.2-.4L10 2.5z"/></svg>Phân tích AI</div>
+      <div class="sb-item"><svg class="ic" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 2.5v3M10 14.5v3M4.2 10H2.5M17.5 10h-1.7"/><circle cx="10" cy="10" r="3.2"/></svg>Chẩn đoán</div>
+      <div class="sb-item"><svg class="ic" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 2.5L2.5 15.5h15L10 2.5z"/><path d="M10 8v3.2M10 13.5v.1"/></svg>Cảnh báo<span class="badge">3</span></div>
+      <div class="sb-item"><svg class="ic" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 10h4M4 5h12M4 15h8"/><circle cx="12" cy="10" r="1"/></svg>A/B Testing</div>
+      <div class="sb-item"><svg class="ic" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 16V9M8 16V4M13 16v-7M17 16v-3"/></svg>Profit Analytics</div>
+
+      <div class="sb-section-lbl">Khác</div>
+      <div class="sb-item"><svg class="ic" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5.5h14M3 10h14M3 14.5h9"/></svg>Báo cáo</div>
+      <div class="sb-item"><svg class="ic" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="11" y="3" width="6" height="6" rx="1"/><rect x="3" y="11" width="6" height="6" rx="1"/><rect x="11" y="11" width="6" height="6" rx="1"/></svg>Integrations</div>
+      <div class="sb-item"><svg class="ic" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="10" cy="10" r="2.3"/><path d="M10 3v1.6M10 15.4V17M17 10h-1.6M4.6 10H3M14.9 5.1l-1.1 1.1M6.2 13.7l-1.1 1.1M14.9 14.9l-1.1-1.1M6.2 6.2L5.1 5.1"/></svg>Settings</div>
+    </nav>
+
+    <div class="sb-workspace">
+      <div class="name">Aurora Performance</div>
+      <div class="meta">5 khách hàng · 8 tài khoản đã kết nối</div>
+    </div>
+
+    <div class="sb-footer">
+      <div class="sb-protect"><span class="dot"></span> Dữ liệu tổ chức được cách ly & mã hoá</div>
+      <div class="sb-user">
+        <div class="av">TN</div>
+        <div class="info">
+          <div class="nm">Thảo Nguyễn</div>
+          <div class="rl">Admin · Aurora Performance</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+    <header class="topheader">
+      <div class="search-box">
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="8.5" cy="8.5" r="5.5"/><path d="M17 17l-4-4"/></svg>
+        <input placeholder="Tìm khách hàng, tài khoản..." />
+      </div>
+      <div class="conn-status"><span class="dot"></span> Đã kết nối TikTok Ads</div>
+      <div class="conn-status warn"><span class="dot"></span> Chưa cấu hình Meta</div>
+      <div class="header-spacer"></div>
+      <button class="hbtn">Kết nối</button>
+      <button class="hbtn primary" id="syncBtn">Đồng bộ</button>
+      <div class="icon-btn"><svg width="17" height="17" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 8a5 5 0 0110 0c0 4 1.5 5 1.5 5h-13S5 12 5 8z"/><path d="M8.3 16a1.8 1.8 0 003.4 0"/></svg><span class="dot"></span></div>
+      <div class="hdr-user">TN</div>
+    </header>
+
+    <main class="content">
+      <div class="page-head">
+        <div>
+          <h1>Hiệu quả quảng cáo toàn agency</h1>
+          <div class="sub">Theo dõi sức khỏe tài khoản, phát hiện vấn đề và ưu tiên hành động.</div>
+        </div>
+        <div class="page-controls">
+          <div class="select-pill">📅 7 ngày qua <span style="opacity:.5;">▾</span></div>
+          <button class="hbtn">Export Excel</button>
+          <button class="hbtn">Export PDF</button>
+        </div>
+      </div>
+
+      <div class="data-strip">
+        <span class="demo-chip">DATA DEMO</span>
+        <span id="lastSync">Cập nhật gần nhất: 2 phút trước</span>
+        <span>·</span>
+        <span>Nguồn: TikTok Ads, Shopee Ads (mock adapter)</span>
+      </div>
+
+      <!-- KPI -->
+      <div class="kpi-grid" id="kpiGrid"></div>
+
+      <!-- AI PRIORITY -->
+      <div class="priority-strip" id="priorityStrip"></div>
+
+      <!-- AI DIAGNOSIS -->
+      <div class="section-title">
+        <h2>AI Chẩn đoán</h2>
+        <a class="link" href="#">Xem tất cả →</a>
+      </div>
+      <div class="diag-grid" id="diagGrid"></div>
+
+      <!-- TABLE -->
+      <div class="section-title">
+        <h2>Hiệu suất chiến dịch</h2>
+      </div>
+      <div class="table-card">
+        <div class="table-toolbar">
+          <input id="tableSearch" placeholder="Tìm chiến dịch...">
+          <div class="tb-spacer"></div>
+          <div class="select-pill">Tất cả trạng thái <span style="opacity:.5;">▾</span></div>
+          <button class="hbtn">Cột hiển thị</button>
+        </div>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr id="tableHead"></tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+        <div class="table-foot">
+          <span id="rowCount">— chiến dịch</span>
+          <div class="pager">
+            <button class="active">1</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+/* ================= MOBILE SIDEBAR ================= */
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('overlay');
+document.getElementById('hamburger').addEventListener('click', ()=>{
+  sidebar.classList.add('open'); overlay.classList.add('show');
+});
+overlay.addEventListener('click', ()=>{ sidebar.classList.remove('open'); overlay.classList.remove('show'); });
+
+/* ================= SYNC BUTTON ================= */
+document.getElementById('syncBtn').addEventListener('click', function(){
+  const btn = this; const original = btn.textContent;
+  btn.textContent = 'Đang đồng bộ...'; btn.disabled = true;
+  setTimeout(()=>{
+    btn.textContent = original; btn.disabled = false;
+    document.getElementById('lastSync').textContent = 'Cập nhật gần nhất: vừa xong';
+  }, 1400);
+});
+
+/* ================= KPI DATA (mock) ================= */
+const kpis = [
+  {lbl:'Tổng chi tiêu', val:'35.240.000đ', chg:'+12,4%', dir:'up', prev:'vs 31.360.000đ tuần trước', tip:'Tổng ngân sách đã chi trong kỳ đã chọn'},
+  {lbl:'Doanh thu', val:'124.800.000đ', chg:'+18,2%', dir:'up', prev:'vs 105.600.000đ tuần trước', tip:'Tổng doanh thu quy về từ đơn hàng có gắn quảng cáo'},
+  {lbl:'Đơn hàng', val:'1.284', chg:'+14,7%', dir:'up', prev:'vs 1.119 tuần trước', tip:'Số đơn hàng ghi nhận từ các chiến dịch'},
+  {lbl:'ROAS', val:'3,54x', chg:'+9,2%', dir:'up', prev:'vs 3,24x tuần trước', tip:'Doanh thu / Chi tiêu quảng cáo'},
+  {lbl:'CPA', val:'27.400đ', chg:'-8,1%', dir:'down', prev:'vs 29.820đ tuần trước', tip:'Chi phí trung bình trên mỗi đơn hàng'},
+  {lbl:'CTR', val:'1,82%', chg:'-4,2%', dir:'down', prev:'vs 1,90% tuần trước', tip:'Tỷ lệ click trên số lượt hiển thị'},
+  {lbl:'CPC', val:'2.450đ', chg:'+11,3%', dir:'up', prev:'vs 2.201đ tuần trước', tip:'Chi phí trung bình trên mỗi lượt click'},
+  {lbl:'CPM', val:'58.200đ', chg:'+6,7%', dir:'up', prev:'vs 54.550đ tuần trước', tip:'Chi phí trên 1.000 lượt hiển thị'},
+];
+const kpiGrid = document.getElementById('kpiGrid');
+kpis.forEach(k=>{
+  const arrow = k.dir==='up' ? '↑' : '↓';
+  const el = document.createElement('div');
+  el.className='kpi-card';
+  el.innerHTML = `
+    <div class="top">
+      <div class="lbl">${k.lbl}</div>
+      <div class="info-dot" title="${k.tip}">i</div>
+    </div>
+    <div class="val">${k.val}</div>
+    <div class="chg ${k.dir}">${arrow} ${k.chg}<span class="prev">${k.prev}</span></div>
+  `;
+  kpiGrid.appendChild(el);
+});
+
+/* ================= PRIORITY STRIP ================= */
+const priorities = [
+  {dot:'critical', count:1, lbl:'Critical'},
+  {dot:'high', count:2, lbl:'High'},
+  {dot:'medium', count:4, lbl:'Medium'},
+  {dot:'stable', count:11, lbl:'Ổn định'},
+];
+const prStrip = document.getElementById('priorityStrip');
+priorities.forEach(p=>{
+  const el = document.createElement('div');
+  el.className='pr-item';
+  el.innerHTML = `<span class="pr-dot ${p.dot}"></span><div><div class="pr-count">${p.count}</div><div class="pr-lbl">${p.lbl}</div></div>`;
+  prStrip.appendChild(el);
+});
+
+/* ================= AI DIAGNOSIS ================= */
+const diagnoses = [
+  {
+    sev:'critical', sevLbl:'🔴 CẦN XỬ LÝ', camp:'UrbanFit · Cold Audience',
+    headline:'UrbanFit đang mất hiệu quả ở nhóm Cold Audience',
+    evidence:['CPA ↑ 38% trong 3 ngày', 'CTR ↓ xuống 0,88%', 'Frequency = 4,7'],
+    inference:'Có dấu hiệu suy giảm hiệu suất creative trên nhóm audience này.',
+    actions:['Kiểm tra creative hiện tại', 'Tạo 2–3 creative variation', 'Theo dõi CPA/CTR trong 3 giờ'],
+  },
+  {
+    sev:'high', sevLbl:'🟠 CẦN CHÚ Ý', camp:'Nexa Academy · Retargeting',
+    headline:'ROAS của Nexa Academy giảm liên tục 2 ngày',
+    evidence:['ROAS giảm từ 4,1x xuống 3,2x', 'CVR giảm 11%', 'Spend giữ nguyên'],
+    inference:'Nhiều khả năng liên quan đến chất lượng landing page hoặc tồn kho sản phẩm.',
+    actions:['Kiểm tra tốc độ tải landing page', 'Xác nhận tồn kho sản phẩm chính', 'Chưa tăng ngân sách'],
+  },
+];
+const diagGrid = document.getElementById('diagGrid');
+diagnoses.forEach(d=>{
+  const el = document.createElement('div');
+  el.className='diag-card';
+  el.innerHTML = `
+    <div class="diag-head">
+      <span class="sev-pill ${d.sev}">${d.sevLbl}</span>
+      <span class="camp">${d.camp}</span>
+    </div>
+    <div class="diag-body">
+      <div class="headline">${d.headline}</div>
+      <div class="diag-block">
+        <div class="lbl">Bằng chứng</div>
+        <ul>${d.evidence.map(e=>`<li>${e}</li>`).join('')}</ul>
+      </div>
+      <div class="diag-block">
+        <div class="lbl">AI nhận định (suy luận)</div>
+        <p>${d.inference}</p>
+      </div>
+      <div class="diag-block" style="margin-bottom:0;">
+        <div class="lbl">Hướng xử lý đề xuất</div>
+        <ul>${d.actions.map(a=>`<li>${a}</li>`).join('')}</ul>
+      </div>
+    </div>
+    <div class="diag-actions">
+      <button class="hbtn">Xem phân tích</button>
+      <button class="hbtn primary">Tạo Creative</button>
+    </div>
+  `;
+  diagGrid.appendChild(el);
+});
+
+/* ================= CAMPAIGN TABLE ================= */
+const columns = [
+  {key:'name', lbl:'Chiến dịch'}, {key:'status', lbl:'Trạng thái'}, {key:'spend', lbl:'Spend'},
+  {key:'impressions', lbl:'Impressions'}, {key:'reach', lbl:'Reach'}, {key:'frequency', lbl:'Frequency'},
+  {key:'clicks', lbl:'Clicks'}, {key:'ctr', lbl:'CTR'}, {key:'cpc', lbl:'CPC'}, {key:'cpm', lbl:'CPM'},
+  {key:'results', lbl:'Results'}, {key:'cpa', lbl:'CPA'}, {key:'revenue', lbl:'Revenue'}, {key:'roas', lbl:'ROAS'},
+  {key:'trend', lbl:'Trend'}, {key:'aiStatus', lbl:'AI Status'},
+];
+const campaigns = [
+  {name:'UrbanFit — Cold Audience', status:'active', spend:8200000, impressions:412000, reach:298000, frequency:4.7, clicks:3630, ctr:0.88, cpc:2260, cpm:19900, results:96, cpa:85400, revenue:19800000, roas:2.41, trend:-14, aiStatus:'critical'},
+  {name:'Nexa Academy — Retargeting', status:'active', spend:5400000, impressions:198000, reach:87000, frequency:2.3, clicks:3960, ctr:2.0, cpc:1360, cpm:27300, results:214, cpa:25200, revenue:17280000, roas:3.2, trend:-6, aiStatus:'high'},
+  {name:'Summer Glow — Broad', status:'active', spend:6100000, impressions:355000, reach:210000, frequency:1.7, clicks:6390, ctr:1.8, cpc:955, cpm:17200, results:188, cpa:32400, revenue:21900000, roas:3.59, trend:4, aiStatus:'medium'},
+  {name:'Boxer Line — Lookalike 3%', status:'active', spend:4300000, impressions:167000, reach:121000, frequency:1.4, clicks:3006, ctr:1.8, cpc:1430, cpm:25700, results:142, cpa:30300, revenue:18100000, roas:4.21, trend:9, aiStatus:'stable'},
+  {name:'Weekend Deal — Shopee Ads', status:'paused', spend:2100000, impressions:88000, reach:64000, frequency:1.4, clicks:1188, ctr:1.35, cpc:1770, cpm:23900, results:41, cpa:51200, revenue:6900000, roas:3.29, trend:0, aiStatus:'stable'},
+  {name:'New Arrivals — TikTok Shop', status:'active', spend:7800000, impressions:301000, reach:189000, frequency:1.6, clicks:5418, ctr:1.8, cpc:1440, cpm:25900, results:203, cpa:38400, revenue:29400000, roas:3.77, trend:6, aiStatus:'stable'},
+];
+
+function fmtVND(n){ return n.toLocaleString('vi-VN') + 'đ'; }
+function fmtNum(n){ return n.toLocaleString('vi-VN'); }
+
+const statusMap = {active:'Đang chạy', paused:'Tạm dừng'};
+const aiStatusMap = {
+  critical:{lbl:'Cần xử lý', bg:'var(--red-soft)', fg:'var(--red)'},
+  high:{lbl:'Cần chú ý', bg:'var(--orange-soft)', fg:'var(--orange)'},
+  medium:{lbl:'Theo dõi', bg:'var(--amber-soft)', fg:'#8A6D14'},
+  stable:{lbl:'Ổn định', bg:'var(--green-soft)', fg:'var(--green)'},
+};
+
+let sortKey = null, sortDir = 1;
+
+function renderHead(){
+  const tr = document.getElementById('tableHead');
+  tr.innerHTML = columns.map(c=>`<th data-key="${c.key}">${c.lbl}<span class="arrow">${sortKey===c.key ? (sortDir===1?'▲':'▼') : ''}</span></th>`).join('');
+  tr.querySelectorAll('th').forEach(th=>{
+    th.addEventListener('click', ()=>{
+      const k = th.dataset.key;
+      if(sortKey===k) sortDir *= -1; else { sortKey=k; sortDir=1; }
+      renderHead(); renderBody();
+    });
+  });
+}
+
+function renderBody(){
+  const q = document.getElementById('tableSearch').value.toLowerCase();
+  let rows = campaigns.filter(c=>c.name.toLowerCase().includes(q));
+  if(sortKey){
+    rows = rows.slice().sort((a,b)=>{
+      let va=a[sortKey], vb=b[sortKey];
+      if(typeof va==='string') return va.localeCompare(vb) * sortDir;
+      return (va-vb) * sortDir;
+    });
+  }
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = rows.map(c=>{
+    const ai = aiStatusMap[c.aiStatus];
+    const trendArrow = c.trend>0 ? '↑' : c.trend<0 ? '↓' : '—';
+    const trendColor = c.trend>0 ? 'var(--green)' : c.trend<0 ? 'var(--red)' : 'var(--text-faint)';
+    return `<tr>
+      <td class="camp-name">${c.name}</td>
+      <td><span class="status-pill ${c.status}">${statusMap[c.status]}</span></td>
+      <td class="mono">${fmtVND(c.spend)}</td>
+      <td class="mono">${fmtNum(c.impressions)}</td>
+      <td class="mono">${fmtNum(c.reach)}</td>
+      <td class="mono">${c.frequency.toFixed(1)}</td>
+      <td class="mono">${fmtNum(c.clicks)}</td>
+      <td class="mono">${c.ctr.toFixed(2)}%</td>
+      <td class="mono">${fmtVND(c.cpc)}</td>
+      <td class="mono">${fmtVND(c.cpm)}</td>
+      <td class="mono">${fmtNum(c.results)}</td>
+      <td class="mono">${fmtVND(c.cpa)}</td>
+      <td class="mono">${fmtVND(c.revenue)}</td>
+      <td class="mono">${c.roas.toFixed(2)}x</td>
+      <td><span class="trend-mini" style="color:${trendColor};">${trendArrow} ${Math.abs(c.trend)}%</span></td>
+      <td><span class="ai-status-pill" style="background:${ai.bg}; color:${ai.fg};">${ai.lbl}</span></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('rowCount').textContent = `${rows.length} chiến dịch`;
+}
+
+document.getElementById('tableSearch').addEventListener('input', renderBody);
+renderHead();
+renderBody();
+</script>
+</body>
+</html>
